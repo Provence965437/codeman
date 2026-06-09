@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>魔珐星云 · PPT 生成视频 Demo</title>
+    <link rel="stylesheet" href="/video/style.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="header">
+        <div>
+          <p class="eyebrow">Video Synthesis API</p>
+          <h1>PPT 上传生成视频</h1>
+          <p class="subtitle">上传 PPT → 云端解析 → 渲染数字人讲解视频 → 下载 MP4</p>
+        </div>
+        <a class="link-back" href="/">← 返回实时讲解 Demo</a>
+      </header>
+
+      <div class="layout">
+        <section class="card alert-card">
+          <h2>⚠️ 密钥必须用「视频生成应用」</h2>
+          <p class="hint">
+            错误码 <strong>20001 应用不存在或无法使用</strong>，几乎都是填错了应用类型。
+            实时讲解 Demo 用的是 <strong>具身驱动应用</strong> 密钥；本页必须用
+            <strong>数字人视频生成应用</strong> 密钥，两者不能混用。
+          </p>
+          <ol class="steps">
+            <li>登录 <a href="https://xingyun3d.com/" target="_blank" rel="noreferrer">xingyun3d.com</a> 控制台</li>
+            <li>进入 <strong>应用管理 → 数字人视频生成</strong>（不是「驱动应用」）</li>
+            <li>创建或打开视频应用 → <strong>查看密钥</strong>，复制 App ID / Secret</li>
+            <li>在同一应用内查看并填写下方的形象、音色、演播室 ID</li>
+          </ol>
+        </section>
+
+        <section class="card">
+          <h2>1. API 配置</h2>
+          <p class="hint">以下 ID 均须来自同一个「视频生成应用」。</p>
+          <label class="field">
+            <span>App ID</span>
+            <input id="appId" type="text" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>App Secret</span>
+            <input id="appSecret" type="password" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>形象 ID (look_name)</span>
+            <input id="lookName" type="text" placeholder="如 caihongwei_3663_new" />
+          </label>
+          <label class="field">
+            <span>音色 ID (tts_vcn_name)</span>
+            <input id="ttsVcnName" type="text" placeholder="如 XMOV_HN_TTS__236" />
+          </label>
+          <label class="field">
+            <span>演播室 ID (studio_name)</span>
+            <input id="studioName" type="text" placeholder="如 telestudio_simple_red_01" />
+          </label>
+          <div class="grid-2">
+            <label class="field">
+              <span>清晰度</span>
+              <select id="resolution">
+                <option value="540P">540P</option>
+                <option value="720P" selected>720P</option>
+                <option value="1080P">1080P</option>
+                <option value="2K">2K</option>
+                <option value="4K">4K</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>视频名称（可选）</span>
+              <input id="videoName" type="text" placeholder="默认按时间生成" />
+            </label>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>2. 上传 PPT 并生成</h2>
+          <label class="field">
+            <span>PPT 文件 (.pptx)</span>
+            <input id="pptFile" type="file" accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation" />
+          </label>
+          <div id="fileMeta" class="file-meta">未选择文件</div>
+          <div class="actions">
+            <button id="generateBtn" class="btn primary">上传并生成视频</button>
+            <button id="pollBtn" class="btn ghost" disabled>手动刷新状态</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>3. 任务进度</h2>
+          <p id="taskStatus" class="status-pill">等待开始</p>
+          <p id="taskMeta" class="meta"></p>
+          <div class="progress-wrap">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+          <pre id="logBox" class="log-box"></pre>
+        </section>
+
+        <section class="card preview-card">
+          <h2>4. 成片预览</h2>
+          <div id="previewEmpty" class="preview-empty">生成完成后在此预览视频</div>
+          <video id="previewVideo" class="preview-video hidden" controls playsinline></video>
+          <a id="downloadLink" class="btn ghost hidden" download>下载视频</a>
+        </section>
+      </div>
+    </div>
+
+    <script type="module" src="/video/main.js"></script>
+  </body>
+</html>

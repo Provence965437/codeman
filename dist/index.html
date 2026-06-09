@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>魔珐星云 · 数字人 PPT 实时讲解 Demo</title>
+    <script type="module" crossorigin src="/assets/main-B8BsxDQm.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+    <link rel="stylesheet" crossorigin href="/assets/main-D6qZvA8C.css">
+  </head>
+  <body>
+    <div class="app">
+      <aside class="panel">
+        <header class="panel-header">
+          <p class="eyebrow">Xingyun3D Embodied Avatar</p>
+          <h1>PPT 实时讲解 Demo</h1>
+          <p class="subtitle">连接数字人 → 开始讲解 → 按页播报并自动翻页</p>
+          <p class="subtitle"><a href="/video/" style="color:#7aa2ff">→ PPT 上传生成视频 Demo</a></p>
+        </header>
+
+        <section class="card">
+          <h2>连接配置</h2>
+          <label class="field">
+            <span>App ID</span>
+            <input id="appId" type="text" placeholder="从魔珐星云控制台获取" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>App Secret</span>
+            <input id="appSecret" type="password" placeholder="从魔珐星云控制台获取" autocomplete="off" />
+          </label>
+          <div class="actions">
+            <button id="connectBtn" class="btn primary">连接数字人</button>
+            <button id="disconnectBtn" class="btn ghost" disabled>断开连接</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>加载状态</h2>
+          <div class="progress-wrap">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+          <p id="progressText" class="meta">尚未连接</p>
+          <p id="statusText" class="status-pill">等待配置</p>
+        </section>
+
+        <section class="card">
+          <h2>导入 PPTX</h2>
+          <p class="hint">上传 .pptx 后按页解析：页面转图片、备注转讲稿，可直接用于数字人讲解。</p>
+          <label class="field">
+            <span>PPT 文件 (.pptx)</span>
+            <input
+              id="pptImportFile"
+              type="file"
+              accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+            />
+          </label>
+          <p id="pptImportMeta" class="meta">未导入，当前使用示例讲稿</p>
+          <div class="actions">
+            <button id="pptImportBtn" class="btn primary">解析并导入</button>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>智能问答</h2>
+          <p class="hint">讲解过程中可点击 PPT 下方「提问」按钮，输入问题后发送。</p>
+          <label class="field">
+            <span>DeepSeek API Key</span>
+            <input id="deepseekKey" type="password" placeholder="sk-..." autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>模型</span>
+            <input id="deepseekModel" type="text" value="deepseek-v4-flash" autocomplete="off" />
+          </label>
+        </section>
+
+        <section class="card card-hidden">
+          <h2>单句试播（调试）</h2>
+          <label class="field">
+            <span>自定义一句话测试 speak</span>
+            <textarea
+              id="textInput"
+              rows="3"
+              placeholder="例如：你好，我是数字人讲解员。"
+              disabled
+            ></textarea>
+          </label>
+          <div class="actions">
+            <button id="speakBtn" class="btn ghost" disabled>试播</button>
+          </div>
+        </section>
+
+        <section class="card log-card">
+          <h2>运行日志</h2>
+          <pre id="logBox" class="log-box"></pre>
+        </section>
+      </aside>
+
+      <main class="stage">
+        <div class="presentation-screen">
+          <button id="archTrigger" type="button" class="arch-trigger" title="查看产品架构设计图">
+            架构设计图
+          </button>
+
+          <div class="presentation-layout">
+            <div class="slide-column">
+              <section class="slide-panel slide-stage">
+                <div class="avatar-orbit avatar-orbit-back" aria-hidden="true">
+                  <article class="orbit-card" data-orbit-back-card>
+                    <span class="orbit-card-tag">AI Presenter</span>
+                    <strong>实时讲解</strong>
+                    <p>逐页播报并自动切换内容</p>
+                  </article>
+                  <article class="orbit-card" data-orbit-back-card>
+                    <span class="orbit-card-tag">Q&A</span>
+                    <strong>智能问答</strong>
+                    <p>用户提问后即时生成回答</p>
+                  </article>
+                  <article class="orbit-card" data-orbit-back-card>
+                    <span class="orbit-card-tag">PPTX</span>
+                    <strong>内容导入</strong>
+                    <p>备注转讲稿，页面转展示图</p>
+                  </article>
+                  <article class="orbit-card" data-orbit-back-card>
+                    <span class="orbit-card-tag">Avatar SDK</span>
+                    <strong>数字人驱动</strong>
+                    <p>透明叠加在演示画面之上</p>
+                  </article>
+                  <article class="orbit-card" data-orbit-back-card>
+                    <span class="orbit-card-tag">Workflow</span>
+                    <strong>演示编排</strong>
+                    <p>讲解、暂停、打断、继续一体控制</p>
+                  </article>
+                </div>
+                <div id="sdk" class="slide-stage-sdk">
+                  <div id="slideContent" class="slide-bg"></div>
+                </div>
+                <div class="avatar-orbit avatar-orbit-front" aria-hidden="true">
+                  <article class="orbit-card" data-orbit-front-card>
+                    <span class="orbit-card-tag">AI Presenter</span>
+                    <strong>实时讲解</strong>
+                    <p>逐页播报并自动切换内容</p>
+                  </article>
+                  <article class="orbit-card" data-orbit-front-card>
+                    <span class="orbit-card-tag">Q&A</span>
+                    <strong>智能问答</strong>
+                    <p>用户提问后即时生成回答</p>
+                  </article>
+                  <article class="orbit-card" data-orbit-front-card>
+                    <span class="orbit-card-tag">PPTX</span>
+                    <strong>内容导入</strong>
+                    <p>备注转讲稿，页面转展示图</p>
+                  </article>
+                  <article class="orbit-card" data-orbit-front-card>
+                    <span class="orbit-card-tag">Avatar SDK</span>
+                    <strong>数字人驱动</strong>
+                    <p>透明叠加在演示画面之上</p>
+                  </article>
+                  <article class="orbit-card" data-orbit-front-card>
+                    <span class="orbit-card-tag">Workflow</span>
+                    <strong>演示编排</strong>
+                    <p>讲解、暂停、打断、继续一体控制</p>
+                  </article>
+                </div>
+                <div id="placeholder" class="avatar-connect-hint">
+                  <div class="avatar-connect-hint-inner">
+                    <p>数字人</p>
+                    <span>连接后叠加在 PPT 上</span>
+                  </div>
+                </div>
+                <div id="subtitleBar" class="subtitle-bar is-hidden" aria-live="polite">
+                  <p id="subtitleText" class="subtitle-text"></p>
+                </div>
+                <div class="slide-footer">
+                  <span id="slideTitle" class="slide-footer-title">等待开始</span>
+                </div>
+              </section>
+
+              <section class="ppt-controls" aria-label="PPT 讲解控制">
+                <div class="ppt-controls-top">
+                  <span id="pptModeBadge" class="ppt-mode-badge mode-idle">待机</span>
+                  <span id="pageIndicator" class="ppt-page-info">第 1 / 4 页</span>
+                </div>
+
+                <div class="ppt-progress" aria-hidden="true">
+                  <div id="pptProgressFill" class="ppt-progress-fill" style="width: 25%"></div>
+                </div>
+
+                <div id="pptPageStrip" class="ppt-page-strip"></div>
+
+                <div class="ppt-toolbar">
+                  <button id="prevBtn" type="button" class="ppt-ctl" disabled title="上一页">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span>上一页</span>
+                  </button>
+
+                  <button id="stopBtn" type="button" class="ppt-ctl" disabled title="停止">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5" fill="currentColor"/></svg>
+                    <span>停止</span>
+                  </button>
+
+                  <button id="startBtn" type="button" class="ppt-ctl ppt-ctl-primary" disabled title="开始讲解">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7l10 5-10 5V7z" fill="currentColor"/></svg>
+                    <span>开始</span>
+                  </button>
+
+                  <button id="pauseBtn" type="button" class="ppt-ctl" disabled title="暂停">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h3v10H8V7zm5 0h3v10h-3V7z" fill="currentColor"/></svg>
+                    <span>暂停</span>
+                  </button>
+
+                  <button id="resumeBtn" type="button" class="ppt-ctl" disabled title="继续">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7v10l9-5-9-5z" fill="currentColor"/></svg>
+                    <span>继续</span>
+                  </button>
+
+                  <button id="nextBtn" type="button" class="ppt-ctl" disabled title="下一页">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span>下一页</span>
+                  </button>
+
+                  <button id="interruptBtn" type="button" class="ppt-ctl ppt-ctl-warn" disabled title="打断当前播报">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4M12 17v4M4.2 4.2l2.8 2.8M17 17l2.8 2.8M3 12h4M17 12h4M4.2 19.8l2.8-2.8M17 7l2.8-2.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <span>打断</span>
+                  </button>
+
+                  <button id="askToggleBtn" type="button" class="ppt-ctl ppt-ctl-ask" disabled title="向数字人提问">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c4.4 0 8 3.1 8 7s-3.6 7-8 7c-.9 0-1.8-.1-2.6-.4L5 21l1.5-3.5C5.6 16.2 4 14.8 4 13c0-3.9 3.6-7 8-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                    <span>提问</span>
+                  </button>
+                </div>
+
+                <div id="questionCompose" class="question-compose is-hidden">
+                  <label class="question-compose-label" for="questionInput">输入你的问题</label>
+                  <textarea
+                    id="questionInput"
+                    rows="3"
+                    placeholder="例如：这套方案适合哪些场景？"
+                    disabled
+                  ></textarea>
+                  <div class="question-compose-actions">
+                    <button id="questionCancelBtn" type="button" class="btn ghost">取消</button>
+                    <button id="sendQuestionBtn" type="button" class="btn primary" disabled>发送</button>
+                  </div>
+                  <p id="answerPreview" class="answer-preview"></p>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div id="archModal" class="arch-modal is-hidden" role="dialog" aria-modal="true" aria-labelledby="archModalTitle">
+      <div class="arch-modal-backdrop"></div>
+      <div class="arch-modal-panel">
+        <header class="arch-modal-header">
+          <div>
+            <p class="arch-modal-eyebrow">Product Architecture</p>
+            <h2 id="archModalTitle">数字人 PPT 讲解 · 架构设计图</h2>
+          </div>
+          <button id="archClose" type="button" class="arch-modal-close" aria-label="关闭">×</button>
+        </header>
+        <div class="arch-modal-body">
+          <div class="arch-legend">
+            <span class="arch-legend-item"><i class="arch-dot arch-dot-client"></i>前端应用层</span>
+            <span class="arch-legend-item"><i class="arch-dot arch-dot-backend"></i>后端服务层</span>
+            <span class="arch-legend-item"><i class="arch-dot arch-dot-external"></i>外部能力层</span>
+            <span class="arch-legend-item"><i class="arch-dot arch-dot-planned"></i>规划中</span>
+          </div>
+
+          <section class="arch-section">
+            <h3>系统组件拓扑</h3>
+            <div class="arch-topology">
+              <div class="arch-row arch-row-user">
+                <div class="arch-node arch-node-neutral">用户<br /><small>观看讲解 / 随时提问</small></div>
+              </div>
+              <div class="arch-arrow">↓</div>
+              <div class="arch-row arch-row-client">
+                <div class="arch-node arch-node-client">Web 前端<small>main.js · index.html</small></div>
+                <div class="arch-node arch-node-client">讲解控制器<small>presentation.js</small></div>
+                <div class="arch-node arch-node-client">PPT 导入<small>import-pptx.js</small></div>
+                <div class="arch-node arch-node-client">智能问答 UI<small>chat.js</small></div>
+                <div class="arch-node arch-node-client">魔珐 SDK<small>XmovAvatar</small></div>
+              </div>
+              <div class="arch-arrow">↓</div>
+              <div class="arch-row arch-row-backend">
+                <div class="arch-node arch-node-backend">API 服务<small>Express app.js :3001</small></div>
+              </div>
+              <div class="arch-arrow">↓</div>
+              <div class="arch-row arch-row-backend">
+                <div class="arch-node arch-node-backend">PPT 解析存储<small>pptx-parser · pptx-render</small></div>
+                <div class="arch-node arch-node-backend">问答编排<small>chat-prompt · deepseek</small></div>
+                <div class="arch-node arch-node-backend">文件存储<small>uploads/{sessionId}/</small></div>
+              </div>
+              <div class="arch-arrow">↓</div>
+              <div class="arch-row arch-row-external">
+                <div class="arch-node arch-node-external">魔珐星云<small>TTSA Session Gateway</small></div>
+                <div class="arch-node arch-node-external">DeepSeek<small>chat/completions</small></div>
+                <div class="arch-node arch-node-external arch-node-planned">内部知识库<small>向量检索 RAG</small></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="arch-section">
+            <h3>智能问答工作流</h3>
+            <ol class="arch-workflow">
+              <li><strong>导入 PPT</strong> — 上传 .pptx → POST /api/presentation/parse-pptx → 按页拆分备注 + 渲染 PNG</li>
+              <li><strong>连接数字人</strong> — XmovAvatar.init() → speak(script) 按页讲解 → voice_end 自动翻页</li>
+              <li><strong>用户提问</strong> — interruptForQuestion() 打断讲解 → listen / think 进入倾听态</li>
+              <li><strong>上下文组装</strong> — PPT 全页 outline + 当前页 + 对话历史 + 知识库 Top-K</li>
+              <li><strong>LLM 推理</strong> — POST /api/chat → DeepSeek 口语化回答（80~150 字）</li>
+              <li><strong>语音播报</strong> — sanitizeForSpeech() → sdk.speak() → 恢复讲解状态机</li>
+            </ol>
+          </section>
+
+          <section class="arch-section">
+            <h3>核心接口</h3>
+            <table class="arch-table">
+              <thead>
+                <tr>
+                  <th>方式</th>
+                  <th>路径 / 方法</th>
+                  <th>职责</th>
+                  <th>输入 → 输出</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>POST</td>
+                  <td>/api/presentation/parse-pptx</td>
+                  <td>PPT 解析与存储</td>
+                  <td>ppt_file → slides[] + image URLs</td>
+                </tr>
+                <tr>
+                  <td>GET</td>
+                  <td>/api/presentation/assets/*</td>
+                  <td>幻灯片图片</td>
+                  <td>sessionId/slide-N.png → PNG</td>
+                </tr>
+                <tr>
+                  <td>POST</td>
+                  <td>/api/chat</td>
+                  <td>智能问答</td>
+                  <td>question + slides + history → answer</td>
+                </tr>
+                <tr>
+                  <td>SDK</td>
+                  <td>XmovAvatar.speak()</td>
+                  <td>数字人驱动</td>
+                  <td>讲稿/回答 → TTS + 口型 + 字幕</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+
+          <section class="arch-section">
+            <h3>PPT 解析存储流水线</h3>
+            <p class="arch-pipeline">
+              上传 PPTX → JSZip 读取 slide 顺序 → 提取 notesSlide 备注为 script → LibreOffice 转 PDF → pymupdf 生成 slide-N.png → 写入 uploads/sessionId → 返回 slides JSON + 图片 URL
+            </p>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://media.xingyun3d.com/xingyun3d/general/litesdk/xmovAvatar@latest.js"></script>
+  </body>
+</html>
